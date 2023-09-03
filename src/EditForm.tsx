@@ -99,12 +99,10 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
         dispatch(setPrefix(value));
         break;
       case 'firstName':
-        // dispatch(setFullName(`${value} ${formData.lastName}`));
         dispatch(setFirstName(value));
         
         break;
       case 'lastName':
-        // dispatch(setFullName(`${formData.firstName} ${value}`));
         dispatch(setLastName(value));
         break;
       case 'birthday':
@@ -190,7 +188,6 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
       initialValues={initialValues}
       onValuesChange={(changedValues, allValues) => {
         if ('firstName' in changedValues || 'lastName' in changedValues) {
-          // Combine first name and last name when either of them changes
           const updatedFullName = `${allValues.firstName || ''} ${allValues.lastName || ''}`;
           dispatch(setFullName(updatedFullName));
         }

@@ -443,9 +443,8 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
       <Table
         dataSource={dataSource}
         columns={columns}
-        pagination={{ pageSize: 10 }} // You can adjust the page size as needed
+        pagination={{ pageSize: 10 }}
         onChange={(pagination, filters, sorter) => {
-          // Handle sorting and filtering here if needed
           console.log('Pagination:', pagination);
           console.log('Filters:', filters);
           console.log('Sorter:', sorter);
