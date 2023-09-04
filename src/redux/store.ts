@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import formReducer from './formSlice';
-import editReducer from './editSlice';
+import formReducer from './formSlice.ts';
+import editReducer from './editSlice.ts';
 
 export const store = configureStore({
   reducer: {

@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Form, Input, Radio, Select, DatePicker, Row, Col, Table, Pagination, Divider } from 'antd';
-import { nationalities, countryCodes } from './data';
+import { Button, Form, Input, Radio, Select, DatePicker, Row, Col } from 'antd';
+import { nationalities, countryCodes } from '../data';
 import {
   setPrefix,
   setFirstName,
@@ -15,84 +15,95 @@ import {
   setTel,
   setPassport,
   setExpectedSalary,
-} from './editSlice'
-interface FormData {
+} from '../redux/editSlice';
+
+type FormData = {
   prefix: string;
   firstName: string;
   lastName: string;
   fullName: string;
   birthday: string;
+  tel: string;
   nationality: string;
   idNumber: string;
   gender: string;
   passport: string;
   expectedSalary: string;
-  key: string
+  key: string;
 }
-interface SavedData {
+
+type SavedData = {
   dataCollection: FormData[];
 }
-const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
+type EditFormProps = {
+  itemToEdit: FormData;
+  setDataSource: (data: FormData[]) => void;
+  setModalIsOpen: (isOpen: boolean) => void; 
+}
+const EditForm = ({
+  itemToEdit,
+  setDataSource,
+  setModalIsOpen,
+}: EditFormProps) => {
   const dispatch = useDispatch();
-  const formData = useSelector((state) => state.editData);
-  const formatId = (id) => {
-    const result = [];
+  const formData = useSelector((state: any) => state.editData);
+  const formatId = (id: string) => {
+    const result: string[] = [];
     if (id.length === 13) {
       result.push(id.charAt(0));
-      result.push(id.substr(1, 4));
-      result.push(id.substr(5, 5));
-      result.push(id.substr(10, 2));
+      result.push(id.substring(1, 4));
+      result.push(id.substring(5, 5));
+      result.push(id.substring(10, 2));
       result.push(id.charAt(12));
     } else {
-      console.error('Input string must have exactly 13 characters');
+      console.error('must have exactly 13 characters');
     }
     return result;
-  }
-  const splitTel = (tel) => {
-    return tel.split(' ');
-  }
-  const [form] = Form.useForm();
-  const [idParts, setIdParts] = useState<string[]>(itemToEdit.idNumber === "" ? ['', '', '', '', ''] :formatId(itemToEdit.idNumber) );
-  const [telParts, setTelParts] = useState<string[]>(splitTel(itemToEdit.tel));
-  const tailLayout = {
-    wrapperCol: { offset: 8, span: 16, },
   };
 
+  const splitTel = (tel: string) => {
+    return tel.split(' ');
+  };
 
-  const getDate = (date) => {
-    const dateParts = date.split("/");
-    return new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-  }
+  const [form] = Form.useForm();
+  const [idParts, setIdParts] = useState<string[]>(
+    itemToEdit.idNumber === '' ? ['', '', '', '', ''] : formatId(itemToEdit.idNumber)
+  );
+  const [telParts, setTelParts] = useState<string[]>(splitTel(itemToEdit.tel));
+
   const initialValues = {
-  birthday: dayjs(itemToEdit.birthday, "MM/DD/YYYY"),
-  expectedSalary: itemToEdit.expectedSalary,
-  firstName: itemToEdit.firstName,
-  gender: itemToEdit.gender,
-  idNumber: idParts,
-  lastName: itemToEdit.lastName,
-  nationality: itemToEdit.nationality,
-  passport: itemToEdit.passport,
-  prefix: itemToEdit.prefix,
-  tel: telParts,
-  }
+    birthday: dayjs(itemToEdit.birthday, 'MM/DD/YYYY'),
+    expectedSalary: itemToEdit.expectedSalary,
+    firstName: itemToEdit.firstName,
+    gender: itemToEdit.gender,
+    idNumber: idParts,
+    lastName: itemToEdit.lastName,
+    nationality: itemToEdit.nationality,
+    passport: itemToEdit.passport,
+    prefix: itemToEdit.prefix,
+    tel: telParts,
+  };
+
   const setInitialStates = () => {
-    dispatch(setExpectedSalary(itemToEdit.expectedSalary))
-    dispatch(setFirstName(itemToEdit.firstName))
-    dispatch(setFullName(itemToEdit.fullName))
-    dispatch(setGender(itemToEdit.gender))
-    if (itemToEdit.idNumber !== "") {
-      dispatch(setIdNumber(itemToEdit.idNumber))
+    dispatch(setExpectedSalary(itemToEdit.expectedSalary));
+    dispatch(setFirstName(itemToEdit.firstName));
+    dispatch(setFullName(itemToEdit.fullName));
+    dispatch(setGender(itemToEdit.gender));
+    if (itemToEdit.idNumber !== '') {
+      dispatch(setIdNumber(itemToEdit.idNumber));
     }
-    dispatch(setLastName(itemToEdit.lastName))
-    dispatch(setNationality(itemToEdit.nationality))
-    dispatch(setPassport(itemToEdit.passport))
-    dispatch(setPrefix(itemToEdit.prefix))
-    dispatch(setTel(itemToEdit.tel))
-    dispatch(setBirthday(itemToEdit.birthday))
-  }
+    dispatch(setLastName(itemToEdit.lastName));
+    dispatch(setNationality(itemToEdit.nationality));
+    dispatch(setPassport(itemToEdit.passport));
+    dispatch(setPrefix(itemToEdit.prefix));
+    dispatch(setTel(itemToEdit.tel));
+    dispatch(setBirthday(itemToEdit.birthday));
+  };
+
   useEffect(() => {
-      setInitialStates()
-  }, [])
+    setInitialStates();
+  }, []);
+
   const handleInputChange = useCallback((name: string, value: string) => {
     switch (name) {
       case 'prefix':
@@ -100,7 +111,6 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
         break;
       case 'firstName':
         dispatch(setFirstName(value));
-        
         break;
       case 'lastName':
         dispatch(setLastName(value));
@@ -127,6 +137,7 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
         break;
     }
   }, [dispatch]);
+
   const handleInputChangeId = (value: string, index: number, maxLength: number) => {
     const numericValue = value.replace(/\D/g, '');
     if (index < 4) {
@@ -140,70 +151,70 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
     const idPartsClone = [...idParts];
     idPartsClone[index] = numericValue;
     setIdParts(idPartsClone);
-    const combinedParts = idPartsClone.join("")
+    const combinedParts = idPartsClone.join('');
     dispatch(setIdNumber(combinedParts));
   };
+
   const handleInputChangeTel = (value: string, index: number) => {
     const numericValue = value.replace(/[^\d-\s]/g, '');
-    const telPartsClone = [...telParts]
+    const telPartsClone = [...telParts];
     if (index === 0) {
-      telPartsClone[index] = value
+      telPartsClone[index] = value;
     } else {
-      telPartsClone[index] = numericValue
+      telPartsClone[index] = numericValue;
     }
-    setTelParts(telPartsClone)
-    const combinedParts = telPartsClone.join(" ")
+    setTelParts(telPartsClone);
+    const combinedParts = telPartsClone.join(' ');
     dispatch(setTel(combinedParts));
-  }
-  console.log('item', itemToEdit)
-  const updateData = (formData : FormData) => {
-    console.log('form finish')
-    const savedDataString = localStorage.getItem('dataCollection');
-    const savedData: SavedData = savedDataString ? JSON.parse(savedDataString) : { dataCollection: [] };
-    if (savedData) {
-      console.log('savedData', savedData)
+  };
 
+  const updateData = (formData: FormData) => {
+    const savedDataString = localStorage.getItem('dataCollection');
+    const savedData: SavedData = savedDataString ? JSON.parse(savedDataString) : [];
+    if (savedData) {
       const updatedData = [...savedData].map((item) => {
-        console.log('itemkey',item.key)
-        console.log('itemtoeditkey', itemToEdit.key)
         if (item.key === itemToEdit.key) {
-          return {...formData, key: item.key}
+          return { ...formData, key: item.key };
         } else {
-          return item
+          return item;
         }
-      })
-      console.log('updated', updatedData)
+      });
       localStorage.setItem('dataCollection', JSON.stringify(updatedData));
-      setDataSource(updatedData)
-      setModalIsOpen(false)
+      setDataSource(updatedData);
+      setModalIsOpen(false);
     }
-  }
+  };
 
   return (
     <div className="modal">
       <Form
-      form={form}
-      name="edit-form"
-      className="edit-form"
-      initialValues={initialValues}
-      onValuesChange={(changedValues, allValues) => {
-        if ('firstName' in changedValues || 'lastName' in changedValues) {
-          const updatedFullName = `${allValues.firstName || ''} ${allValues.lastName || ''}`;
-          dispatch(setFullName(updatedFullName));
-        }
-      }}
-       onFinish={() => updateData(formData)}>
+        form={form}
+        name="edit-form"
+        className="edit-form"
+        initialValues={initialValues}
+        onValuesChange={(changedValues, allValues) => {
+          if ('firstName' in changedValues || 'lastName' in changedValues) {
+            const updatedFullName = `${allValues.firstName || ''} ${allValues.lastName || ''}`;
+            dispatch(setFullName(updatedFullName));
+          }
+        }}
+        onFinish={() => updateData(formData)}
+      >
         <Row gutter={8}>
           <Col span={4}>
-            <Form.Item  name="prefix" label="คำนำหน้า" rules={[{ required: true, message: "ได้โปรดเลือกคำนำหน้า" }]}>
+            <Form.Item
+              name="prefix"
+              label="คำนำหน้า"
+              rules={[{ required: true, message: 'ได้โปรดเลือกคำนำหน้า' }]}
+            >
               <Select
-              placeholder="คำนำหน้า"
-              value={formData.prefix}
-              onChange={(value) => handleInputChange('prefix', value)}
+                placeholder="คำนำหน้า"
+                value={formData.prefix}
+                onChange={(value) => handleInputChange('prefix', value)}
               >
-                <Option value="นาย">นาย</Option>
-                <Option value="นาง">นาง</Option>
-                <Option value="นางสาว">นางสาว</Option>
+                <Select.Option value="นาย">นาย</Select.Option>
+                <Select.Option value="นาง">นาง</Select.Option>
+                <Select.Option value="นางสาว">นางสาว</Select.Option>
               </Select>
             </Form.Item>
           </Col>
@@ -216,7 +227,7 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item  name="lastName" label="นามสกุล" rules={[{ required: true }]}>
+            <Form.Item name="lastName" label="นามสกุล" rules={[{ required: true }]}>
               <Input
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -238,11 +249,12 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
           <Col span={10}>
             <Form.Item name="nationality" label="สัญชาติ" rules={[{ required: true }]}>
               <Select
-              value={formData.nationality}
-              onChange={(value) => handleInputChange('nationality', value)}
-              placeholder="- - กรุณาเลือก - -">
+                value={formData.nationality}
+                onChange={(value) => handleInputChange('nationality', value)}
+                placeholder="- - กรุณาเลือก - -"
+              >
                 {nationalities.map((item, index) => {
-                  return <Option key={index} value={item}>{item}</Option>;
+                  return <Select.Option key={index} value={item}>{item}</Select.Option>;
                 })}
               </Select>
             </Form.Item>
@@ -251,36 +263,37 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
         <Form.Item name="idNumber" label="เลขบัตรประชาชน">
           <Row>
             {idParts.map((part, index, array) => {
-            const getMaxLength = (index: number): number => {
-            switch (index) {
-              case 0:
-                return 1;
-              case 1:
-                return 4;
-              case 2:
-                return 5;
-              case 3:
-                return 2;
-              case 4:
-                return 1;
-              default:
-                return 3;
-            }
-            };
+              const getMaxLength = (index: number): number => {
+                switch (index) {
+                  case 0:
+                    return 1;
+                  case 1:
+                    return 4;
+                  case 2:
+                    return 5;
+                  case 3:
+                    return 2;
+                  case 4:
+                    return 1;
+                  default:
+                    return 3;
+                }
+              };
               const maxLength = getMaxLength(index);
               return (
                 <Col
-                className="id-input" 
-                span={index === 0
-                  ? 3
-                  : index === 1
-                  ? 5
-                  : index === 2
-                  ? 5
-                  : index === 3
-                  ? 4
-                  : 3
-                }
+                  className="id-input"
+                  span={
+                    index === 0
+                      ? 3
+                      : index === 1
+                      ? 5
+                      : index === 2
+                      ? 5
+                      : index === 3
+                      ? 4
+                      : 3
+                  }
                 >
                   <Input
                     key={index}
@@ -289,10 +302,7 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
                     onChange={(e) => handleInputChangeId(e.target.value, index, maxLength)}
                     maxLength={maxLength}
                   />
-                    <span className={`dash
-                    ${index === array.length - 1 ? "hidden" : ""}`}>
-                      -
-                    </span>
+                  <span className={`dash ${index === array.length - 1 ? 'hidden' : ''}`}>-</span>
                 </Col>
               );
             })}
@@ -319,9 +329,9 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
                 value={telParts[0]}
                 onChange={(value) => handleInputChangeTel(value, 0)}
               >
-                  {countryCodes.map((item, index) => {
-                    return <Option key={index} value={item}>{item}</Option>;
-                  })}
+                {countryCodes.map((item, index) => {
+                  return <Select.Option key={index} value={item}>{item}</Select.Option>;
+                })}
               </Select>
               <span className="dash">-</span>
             </Col>
@@ -357,19 +367,18 @@ const EditForm = ({ itemToEdit, setDataSource, setModalIsOpen }) => {
             </Form.Item>
           </Col>
           <Col span={14}>
-        <Form.Item {...tailLayout}>
-          <Button htmlType="submit" className="send-button">
-            แก้ข้อมูล
-          </Button>
-          <Button htmlType="button" onClick={() => setModalIsOpen(false)}>
-            ยกเลิก
-          </Button>
-        </Form.Item>
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+              <Button htmlType="submit" className="send-button">
+                แก้ข้อมูล
+              </Button>
+              <Button htmlType="button" onClick={() => setModalIsOpen(false)}>
+                ยกเลิก
+              </Button>
+            </Form.Item>
           </Col>
         </Row>
       </Form>
     </div>
-
   );
 };
 

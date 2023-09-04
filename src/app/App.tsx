@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Input, Radio, Select, DatePicker, Row, Col, Table, Checkbox, Divider } from 'antd';
-import './styles/App.scss';
-import { nationalities, countryCodes } from './data';
+import '../styles/App.scss';
+import { nationalities, countryCodes } from '../data';
 import {
   setPrefix,
   setFirstName,
@@ -15,19 +15,16 @@ import {
   setTel,
   setPassport,
   setExpectedSalary,
-} from './formslice'
+} from '../redux/formSlice';
 import EditForm from './EditForm';
-const { Option } = Select;
-const tailLayout = {
-  wrapperCol: { offset: 8, span: 16, },
-};
 
-interface FormData {
+type FormData = {
   prefix: string;
   firstName: string;
   lastName: string;
   fullName: string;
   birthday: string;
+  tel: string;
   nationality: string;
   idNumber: string;
   gender: string;
@@ -35,7 +32,7 @@ interface FormData {
   expectedSalary: string;
   key: string;
 }
-interface SavedData {
+type SavedData = {
   dataCollection: FormData[];
 }
 
@@ -45,17 +42,17 @@ const App: React.FC = () => {
   const [form] = Form.useForm();
   const [idParts, setIdParts] = useState<string[]>(['', '', '', '', '']);
   const [telParts, setTelParts] = useState<string[]>(['', '']);
-  const [dataSource, setDataSource] = useState<FormData[]>([])
-  const [modalIsOpen, setModalIsOpen] = useState(false)
-  const [itemToEdit, setItemToEdit] = useState({})
-  const [selectedItems, setSelectedItems] = useState([])
-  const [isSelectAll, setIsSelectAll] = useState(false)
+  const [dataSource, setDataSource] = useState<FormData[]>([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState({});
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isSelectAll, setIsSelectAll] = useState(false);
   console.log(formData);
 
   const onReset = () => {
     form.resetFields();
-    setIdParts(['', '', '', '', ''])
-    setTelParts(['', ''])
+    setIdParts(['', '', '', '', '']);
+    setTelParts(['', '']);
   };
 
   const handleInputChange = useCallback((name: string, value: string) => {
@@ -91,6 +88,7 @@ const App: React.FC = () => {
         break;
     }
   }, [dispatch]);
+
   const handleInputChangeId = (value: string, index: number, maxLength: number) => {
     const numericValue = value.replace(/\D/g, '');
     if (index < 4) {
@@ -104,19 +102,19 @@ const App: React.FC = () => {
     const idPartsClone = [...idParts];
     idPartsClone[index] = numericValue;
     setIdParts(idPartsClone);
-    const combinedParts = idPartsClone.join("")
+    const combinedParts = idPartsClone.join("");
     dispatch(setIdNumber(combinedParts));
   };
   const handleInputChangeTel = (value: string, index: number) => {
     const numericValue = value.replace(/[^\d-\s]/g, '');
-    const telPartsClone = [...telParts]
+    const telPartsClone = [...telParts];
     if (index === 0) {
-      telPartsClone[index] = value
+      telPartsClone[index] = value;
     } else {
-      telPartsClone[index] = numericValue
+      telPartsClone[index] = numericValue;
     }
-    setTelParts(telPartsClone)
-    const combinedParts = telPartsClone.join(" ")
+    setTelParts(telPartsClone);
+    const combinedParts = telPartsClone.join(" ");
     dispatch(setTel(combinedParts));
   }
 
@@ -125,19 +123,19 @@ const columns = [
     title: 'ชื่อ',
     dataIndex: 'fullName',
     key: 'fullName',
-    sorter: (a, b) => a.fullName.localeCompare(b.fullName),
+    sorter: (a: FormData, b: FormData) => a.fullName.localeCompare(b.fullName),
   },
   {
     title: 'เพศ',
     dataIndex: 'gender',
     key: 'gender',
-    sorter: (a, b) => a.age - b.age,
+    sorter: (a: FormData, b: FormData) => a.gender.localeCompare(b.gender),
   },
   {
     title: 'หมายเลขโทรศัพท์มือถือ',
     dataIndex: 'tel',
     key: 'tel',
-    sorter: (a, b) => {
+    sorter: (a: FormData, b: FormData) => {
       const telA = a.tel.replace(/[^\d]/g, '');
       const telB = b.tel.replace(/[^\d]/g, '');
       return parseInt(telA) - parseInt(telB)
@@ -147,13 +145,13 @@ const columns = [
     title: 'สัญชาติ',
     dataIndex: 'nationality',
     key: 'nationality',
-    sorter: (a, b) => a.nationality.localeCompare(b.email),
+    sorter: (a: FormData, b: FormData) => a.nationality.localeCompare(b.nationality),
   },
   {
     title: 'จัดการ',
     dataIndex: 'action',
     key: 'action',
-    render: (text, record) => (
+    render: (text: string, record: FormData) => (
       <span>
         <Button  onClick={() => handleEdit(record)}>แก้ไข</Button>
         <Divider type="vertical" />
@@ -166,78 +164,74 @@ const columns = [
     ),
   },
 ];
-console.log(selectedItems)
-const handleEdit = (record) => {
-  const itemToEdit = dataSource.find((item) => {return item.key === record.key})
-  console.log('itemToedit', itemToEdit)
-  setModalIsOpen(true)
-  setItemToEdit(record)
-}
-const handleDelete = (key) => {
+
+const handleEdit = (record: FormData) => {
+  setModalIsOpen(true);
+  setItemToEdit(record);
+};
+
+const handleDelete = (key: string) => {
   const updatedData = dataSource.filter((item) => {return item.key !== key});
     localStorage.setItem('dataCollection', JSON.stringify(updatedData));
     setDataSource(updatedData);
-}
-const handleSelectItem = (key) => {
+};
+
+const handleSelectItem = (key: any) => {
   if (!selectedItems.includes(key)) {
     setSelectedItems((prev) => {
       return [...prev, key]
     })
   } else {
     const newSelectedItems = selectedItems.filter((item) => item !== key);
-    setSelectedItems(newSelectedItems)
+    setSelectedItems(newSelectedItems);
   }
-}
+};
+
 const handleSelectAllItems = () => {
   if (!isSelectAll) {
     dataSource.map((item) => {
       setSelectedItems((prev) => {
-        return [...prev, item.key]
+        return [...prev, item.key];
       })
     })
-    setIsSelectAll(true)
+    setIsSelectAll(true);
   } else {
-    setSelectedItems([])
-    setIsSelectAll(false)
+    setSelectedItems([]);
+    setIsSelectAll(false);
   }
-}
+};
 
 useEffect(() => {
   const savedData = localStorage.getItem('dataCollection');
   if (savedData && savedData.length !== 0) {
     const parsedData = JSON.parse(savedData);
-    console.log('parsedData', parsedData)
-    const dataSource = parsedData.map((item, index) => ({ ...item, key: index }));
-    setDataSource(dataSource)
+    const dataSource = parsedData.map((item: FormData, index: number) => ({ ...item, key: index }));
+    setDataSource(dataSource);
   } else {
     localStorage.setItem('dataCollection', JSON.stringify([]));
   }
 }, []);
 const saveFormDataToLocalStorage = (formData : FormData) => {
-  console.log('form finish')
   const savedDataString = localStorage.getItem('dataCollection');
-  const savedData: SavedData = savedDataString ? JSON.parse(savedDataString) : { dataCollection: [] };
+  const savedData: SavedData = savedDataString ? JSON.parse(savedDataString) : [];
   if (savedData) {
-    const updatedData = [...savedData, formData]
-    const updatedDataWithKey = updatedData.map((item, index) => ({ ...item, key: index }))
+    const updatedData = [...savedData, formData];
+    const updatedDataWithKey = updatedData.map((item, index) => ({ ...item, key: index }));
     localStorage.setItem('dataCollection', JSON.stringify(updatedDataWithKey));
     setDataSource(updatedDataWithKey);
+    onReset();
   }
 };
-const clearLocalStorageData = () => {
-  localStorage.removeItem('dataCollection');
-  setDataSource([])
-};
 
-const removeSelectedDataFromLocalStorage = (selectedItems) => {
+const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
   const savedDataString = localStorage.getItem('dataCollection');
-  const savedData = savedDataString ? JSON.parse(savedDataString) : { dataCollection: [] };
+  const savedData = savedDataString ? JSON.parse(savedDataString) : [];
   if (savedData) {
     const updatedData = [...savedData].filter((item) => {
       return !selectedItems.includes(item.key);
     });
-    localStorage.setItem('dataCollection', JSON.stringify({updatedData}));
-    setSelectedItems([])
+    localStorage.setItem('dataCollection', JSON.stringify(updatedData));
+    setSelectedItems([]);
     setDataSource(updatedData);
   }
 };
@@ -264,9 +258,9 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
               value={formData.prefix}
               onChange={(value) => handleInputChange('prefix', value)}
               >
-                <Option value="นาย">นาย</Option>
-                <Option value="นาง">นาง</Option>
-                <Option value="นางสาว">นางสาว</Option>
+                <Select.Option value="นาย">นาย</Select.Option>
+                <Select.Option value="นาง">นาง</Select.Option>
+                <Select.Option value="นางสาว">นางสาว</Select.Option>
               </Select>
             </Form.Item>
           </Col>
@@ -305,7 +299,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
               onChange={(value) => handleInputChange('nationality', value)}
               placeholder="- - กรุณาเลือก - -">
                 {nationalities.map((item, index) => {
-                  return <Option key={index} value={item}>{item}</Option>;
+                  return <Select.Option key={index} value={item}>{item}</Select.Option>;
                 })}
               </Select>
             </Form.Item>
@@ -383,7 +377,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
                 onChange={(value) => handleInputChangeTel(value, 0)}
               >
                   {countryCodes.map((item, index) => {
-                    return <Option key={index} value={item}>{item}</Option>;
+                    return <Select.Option key={index} value={item}>{item}</Select.Option>;
                   })}
               </Select>
               <span className="dash">-</span>
@@ -420,7 +414,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
             </Form.Item>
           </Col>
           <Col span={14}>
-        <Form.Item {...tailLayout}>
+        <Form.Item wrapperCol={{ offset: 8, span: 16}}>
           <Button htmlType="submit" className="send-button">
             ส่งข้อมูล
           </Button>
@@ -453,7 +447,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems) => {
 
     </div>
     {modalIsOpen && (
-      <EditForm itemToEdit={itemToEdit} setDataSource={setDataSource} setModalIsOpen={setModalIsOpen}/>
+      <EditForm itemToEdit={itemToEdit as FormData} setDataSource={setDataSource} setModalIsOpen={setModalIsOpen}/>
     )}
     </section>
   );
