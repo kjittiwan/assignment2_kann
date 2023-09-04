@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Input, Radio, Select, DatePicker, Row, Col } from 'antd';
-import { nationalities, countryCodes } from '../data';
+import { nationalities, countryCodes } from '../utils/data'
 import {
   setPrefix,
   setFirstName,

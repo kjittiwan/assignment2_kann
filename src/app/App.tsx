@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Input, Radio, Select, DatePicker, Row, Col, Table, Checkbox, Divider } from 'antd';
 import '../styles/App.scss';
-import { nationalities, countryCodes } from '../data';
+import { nationalities, countryCodes } from '../utils/data'
 import {
   setPrefix,
   setFirstName,
@@ -17,6 +17,7 @@ import {
   setExpectedSalary,
 } from '../redux/formSlice';
 import EditForm from './EditForm';
+import { useTranslation } from 'react-i18next';
 
 type FormData = {
   prefix: string;
@@ -35,11 +36,11 @@ type FormData = {
 type SavedData = {
   dataCollection: FormData[];
 }
+type LanguageObject = {
+  [key: string]: { nativeName: string };
+};
 
 const App: React.FC = () => {
-  const dispatch = useDispatch();
-  const formData = useSelector((state) => state.formData);
-  const [form] = Form.useForm();
   const [idParts, setIdParts] = useState<string[]>(['', '', '', '', '']);
   const [telParts, setTelParts] = useState<string[]>(['', '']);
   const [dataSource, setDataSource] = useState<FormData[]>([]);
@@ -47,7 +48,22 @@ const App: React.FC = () => {
   const [itemToEdit, setItemToEdit] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
-  console.log(formData);
+  const dispatch = useDispatch();
+  const formData = useSelector((state) => state.formData);
+  const [form] = Form.useForm();
+  const { t, i18n } = useTranslation()
+  const lngs : LanguageObject = {
+    en: { nativeName: 'English' },
+    th: { nativeName: 'Thai' }
+  };
+  const selectedLanguage = i18n.resolvedLanguage === 'th' ? 'th' : 'en';
+
+  const handleLangChange = (value: string) => {
+    if (lngs[value]) {
+      i18n.changeLanguage(value);
+      console.log(i18n.resolvedLanguage);
+    }
+  };
 
   const onReset = () => {
     form.resetFields();
@@ -235,10 +251,32 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
     setDataSource(updatedData);
   }
 };
+
   return (
     <section>
       <header>
-        <h1>การจัดการหน้าฟอร์ม</h1>
+        <h1>{t('header')}</h1>
+        <Select
+        value={selectedLanguage}
+          defaultValue={i18n.resolvedLanguage === 'th'
+          ? 'th'
+          : 'en'
+          }
+          onChange={handleLangChange}
+          className='select'
+        >
+          <Select.Option
+          value='en'
+          disabled={i18n.resolvedLanguage === 'en'}
+          >
+            {t('language.en')}
+          </Select.Option>
+          <Select.Option
+          value='th'
+          disabled={i18n.resolvedLanguage === 'th'}>
+            {t('language.th')}
+          </Select.Option>
+        </Select>
       </header>
       <Form
       form={form}
@@ -252,20 +290,20 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
        onFinish={() => saveFormDataToLocalStorage(formData)}>
         <Row gutter={8}>
           <Col span={4}>
-            <Form.Item  name="prefix" label="คำนำหน้า" rules={[{ required: true, message: "ได้โปรดเลือกคำนำหน้า" }]}>
+            <Form.Item  name="prefix" label={t('input.prefix')} rules={[{ required: true, message: "ได้โปรดเลือกคำนำหน้า" }]}>
               <Select
-              placeholder="คำนำหน้า"
+              placeholder={t('input.prefix')}
               value={formData.prefix}
               onChange={(value) => handleInputChange('prefix', value)}
               >
-                <Select.Option value="นาย">นาย</Select.Option>
-                <Select.Option value="นาง">นาง</Select.Option>
-                <Select.Option value="นางสาว">นางสาว</Select.Option>
+                <Select.Option value="นาย">{t('options.prefix.mr')}</Select.Option>
+                <Select.Option value="{t('options.prefix.mrs')}">นาง</Select.Option>
+                <Select.Option value="นางสาว">{t('options.prefix.ms')}</Select.Option>
               </Select>
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="firstName" label="ชื่อจริง" rules={[{ required: true }]}>
+            <Form.Item name="firstName" label={t('input.firstName')} rules={[{ required: true }]}>
               <Input
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -273,7 +311,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item  name="lastName" label="นามสกุล" rules={[{ required: true }]}>
+            <Form.Item  name="lastName" label={t('input.lastName')} rules={[{ required: true }]}>
               <Input
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -283,7 +321,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
         </Row>
         <Row gutter={8}>
           <Col span={6}>
-            <Form.Item name="birthday" label="วันเกิด" rules={[{ required: true }]}>
+            <Form.Item name="birthday" label={t('input.birthday')} rules={[{ required: true }]}>
               <DatePicker
                 format="MM/DD/YYYY"
                 placeholder="เดือน/วัน/ปี"
@@ -293,7 +331,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="nationality" label="สัญชาติ" rules={[{ required: true }]}>
+            <Form.Item name="nationality" label={t('input.nationality')} rules={[{ required: true }]}>
               <Select
               value={formData.nationality}
               onChange={(value) => handleInputChange('nationality', value)}
@@ -305,7 +343,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="idNumber" label="เลขบัตรประชาชน">
+        <Form.Item name="idNumber" label={t('input.idNumber')}>
           <Row>
             {idParts.map((part, index, array) => {
             const getMaxLength = (index: number): number => {
@@ -357,19 +395,19 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
         </Form.Item>
         <Row>
           <Col>
-            <Form.Item name="gender" label="เพศ" rules={[{ required: true }]}>
+            <Form.Item name="gender" label={t('input.gender')} rules={[{ required: true }]}>
               <Radio.Group
                 value={formData.gender}
                 onChange={(e) => handleInputChange('gender', e.target.value)}
               >
-                <Radio value={'ผู้ชาย'}>ผู้ชาย</Radio>
-                <Radio value={'ผู้หญิง'}>ผู้หญิง</Radio>
-                <Radio value={'ไม่ระบุ'}>ไม่ระบุ</Radio>
+                <Radio value={'ผู้ชาย'}>{t('options.gender.male')}</Radio>
+                <Radio value={'ผู้หญิง'}>{t('options.gender.female')}</Radio>
+                <Radio value={'ไม่ระบุ'}>{t('options.gender.notSaying')}</Radio>
               </Radio.Group>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="tel" label="หมายเลขโทรศัพท์มือถือ" rules={[{ required: true }]}>
+        <Form.Item name="tel" label={t('input.tel')} rules={[{ required: true }]}>
           <Row>
             <Col span={4} className="id-input">
               <Select
@@ -392,7 +430,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
         </Form.Item>
         <Row>
           <Col span={10}>
-            <Form.Item name="passport" label="หนังสือเดินทาง">
+            <Form.Item name="passport" label={t('input.passport')}>
               <Input
                 value={formData.passport}
                 onChange={(e) => handleInputChange('passport', e.target.value)}
@@ -404,7 +442,7 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
           <Col span={10}>
             <Form.Item
               name="expectedSalary"
-              label="เงินเดือนที่คาดหวัง"
+              label={t('input.expectedSalary')}
               rules={[{ required: true }]}
             >
               <Input
@@ -416,10 +454,10 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
           <Col span={14}>
         <Form.Item wrapperCol={{ offset: 8, span: 16}}>
           <Button htmlType="submit" className="send-button">
-            ส่งข้อมูล
+          {t('action.submit')}
           </Button>
           <Button htmlType="button" onClick={onReset}>
-            ล้างข้อมูล
+          {t('action.clear')}
           </Button>
         </Form.Item>
           </Col>
@@ -428,10 +466,10 @@ const removeSelectedDataFromLocalStorage = (selectedItems: string[]) => {
       <div className="table-container">
         <div className="delete-container">
           <Checkbox checked={isSelectAll} onChange={handleSelectAllItems}>
-            เลือกทั้งหมด
+          {t('action.selectAll')}
           </Checkbox>
           <Button onClick={() => removeSelectedDataFromLocalStorage(selectedItems)}>
-            ลบข้อมูล
+            {t('action.deleteSelection')}
           </Button>
         </div>
       <Table
