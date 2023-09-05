@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Input, Radio, Select, DatePicker, Row, Col } from 'antd';
-import { nationalities, countryCodes } from '../utils/data'
+import { nationalitiesTh, nationalitiesEn, countryCodes } from '../utils/data'
 import {
   setPrefix,
   setFirstName,
@@ -16,6 +16,8 @@ import {
   setPassport,
   setExpectedSalary,
 } from '../redux/editSlice';
+import { TFunction } from 'i18next';
+import { RootState } from '../redux/store';
 
 type FormData = {
   prefix: string;
@@ -39,21 +41,25 @@ type EditFormProps = {
   itemToEdit: FormData;
   setDataSource: (data: FormData[]) => void;
   setModalIsOpen: (isOpen: boolean) => void; 
+  t: TFunction;
+  currentLanguage: string
 }
-const EditForm = ({
+function EditForm ({
   itemToEdit,
   setDataSource,
   setModalIsOpen,
-}: EditFormProps) => {
+  t,
+  currentLanguage,
+}: EditFormProps) : JSX.Element {
   const dispatch = useDispatch();
-  const formData = useSelector((state: any) => state.editData);
+  const formData = useSelector((state: RootState) => state.editData);
   const formatId = (id: string) => {
     const result: string[] = [];
     if (id.length === 13) {
       result.push(id.charAt(0));
-      result.push(id.substring(1, 4));
-      result.push(id.substring(5, 5));
-      result.push(id.substring(10, 2));
+      result.push(id.substring(1, 5));
+      result.push(id.substring(5, 10));
+      result.push(id.substring(10, 12));
       result.push(id.charAt(12));
     } else {
       console.error('must have exactly 13 characters');
@@ -91,6 +97,8 @@ const EditForm = ({
     dispatch(setGender(itemToEdit.gender));
     if (itemToEdit.idNumber !== '') {
       dispatch(setIdNumber(itemToEdit.idNumber));
+    } else {
+      dispatch(setIdNumber(''))
     }
     dispatch(setLastName(itemToEdit.lastName));
     dispatch(setNationality(itemToEdit.nationality));
@@ -138,22 +146,30 @@ const EditForm = ({
     }
   }, [dispatch]);
 
-  const handleInputChangeId = (value: string, index: number, maxLength: number) => {
-    const numericValue = value.replace(/\D/g, '');
-    if (index < 4) {
-      if (numericValue.length === maxLength) {
+  const handleInputChangeId = (userInput: string, value: string, index: number, maxLength: number) => {
+    const idPartsClone = [...idParts];
+    console.log('userInput', userInput)
+    if (userInput === 'deleteContentBackward') {
+      idPartsClone[index] = idPartsClone[index].slice(0, -1);
+      if (index > 0 && idParts[index].trim().length === 1) {
+        const prevIndex = index - 1;
+        document.getElementById(`input-${prevIndex}-edit`)?.focus();
+      }
+    } else {
+      const numericValue = value.replace(/\D/g, '');
+      if (index < 4 && numericValue.length === maxLength) {
         const nextIndex = index + 1;
         if (nextIndex < idParts.length) {
-          document.getElementById(`input-${nextIndex}`)?.focus();
+          document.getElementById(`input-${nextIndex}-edit`)?.focus();
         }
-      }
+      } 
+      idPartsClone[index] = numericValue;
     }
-    const idPartsClone = [...idParts];
-    idPartsClone[index] = numericValue;
+    const combinedParts = idPartsClone.join("");
     setIdParts(idPartsClone);
-    const combinedParts = idPartsClone.join('');
     dispatch(setIdNumber(combinedParts));
   };
+
 
   const handleInputChangeTel = (value: string, index: number) => {
     const numericValue = value.replace(/[^\d-\s]/g, '');
@@ -204,22 +220,28 @@ const EditForm = ({
           <Col span={4}>
             <Form.Item
               name="prefix"
-              label="คำนำหน้า"
-              rules={[{ required: true, message: 'ได้โปรดเลือกคำนำหน้า' }]}
+              label={t('input.prefix')}
+              rules={[{ required: true, message: t('error') }]}
             >
               <Select
-                placeholder="คำนำหน้า"
+                placeholder={t('input.prefix')}
                 value={formData.prefix}
                 onChange={(value) => handleInputChange('prefix', value)}
               >
-                <Select.Option value="นาย">นาย</Select.Option>
-                <Select.Option value="นาง">นาง</Select.Option>
-                <Select.Option value="นางสาว">นางสาว</Select.Option>
+                <Select.Option value={t('options.prefix.mr')}>
+                  {t('options.prefix.mr')}
+                </Select.Option>
+                <Select.Option value={t('options.prefix.mrs')}>
+                  {t('options.prefix.mrs')}
+                </Select.Option>
+                <Select.Option value={t('options.prefix.ms')}>
+                  {t('options.prefix.ms')}
+                </Select.Option>
               </Select>
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="firstName" label="ชื่อจริง" rules={[{ required: true }]}>
+            <Form.Item name="firstName" label={t('input.firstName')} rules={[{ required: true, message: t('error') }]}>
               <Input
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -227,7 +249,7 @@ const EditForm = ({
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="lastName" label="นามสกุล" rules={[{ required: true }]}>
+            <Form.Item name="lastName" label={t('input.lastName')} rules={[{ required: true, message: t('error') }]}>
               <Input
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -237,30 +259,39 @@ const EditForm = ({
         </Row>
         <Row gutter={8}>
           <Col span={6}>
-            <Form.Item name="birthday" label="วันเกิด" rules={[{ required: true }]}>
+            <Form.Item name="birthday" label={t('input.birthday')} rules={[{ required: true, message: t('error') }]}>
               <DatePicker
                 format="MM/DD/YYYY"
-                placeholder="เดือน/วัน/ปี"
+                placeholder={t('placeholder.birthday')}
                 value={formData.birthday}
-                onChange={(date, dateString) => handleInputChange('birthday', dateString)}
+                onChange={(_date, dateString) => handleInputChange('birthday', dateString)}
               />
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="nationality" label="สัญชาติ" rules={[{ required: true }]}>
+            <Form.Item name="nationality" label={t('input.nationality')} rules={[{ required: true, message: t('error') }]}>
               <Select
                 value={formData.nationality}
                 onChange={(value) => handleInputChange('nationality', value)}
-                placeholder="- - กรุณาเลือก - -"
+                placeholder={t('placeholder.nationality')}
               >
-                {nationalities.map((item, index) => {
-                  return <Select.Option key={index} value={item}>{item}</Select.Option>;
-                })}
+                {currentLanguage === 'th'
+                  ? nationalitiesTh.map((item, index) => (
+                      <Select.Option key={index} value={item}>
+                        {item}
+                      </Select.Option>
+                    ))
+                  : nationalitiesEn.map((item, index) => (
+                      <Select.Option key={index} value={item}>
+                        {item}
+                      </Select.Option>
+                    ))
+                }
               </Select>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="idNumber" label="เลขบัตรประชาชน">
+        <Form.Item name="idNumber" label={t('input.idNumber')}>
           <Row>
             {idParts.map((part, index, array) => {
               const getMaxLength = (index: number): number => {
@@ -282,6 +313,7 @@ const EditForm = ({
               const maxLength = getMaxLength(index);
               return (
                 <Col
+                  key={index}
                   className="id-input"
                   span={
                     index === 0
@@ -296,10 +328,9 @@ const EditForm = ({
                   }
                 >
                   <Input
-                    key={index}
-                    id={`input-${index}`}
+                    id={`input-${index}-edit`}
                     value={part}
-                    onChange={(e) => handleInputChangeId(e.target.value, index, maxLength)}
+                    onChange={(e) => handleInputChangeId(e.nativeEvent?.inputType, e.target.value, index, maxLength)}
                     maxLength={maxLength}
                   />
                   <span className={`dash ${index === array.length - 1 ? 'hidden' : ''}`}>-</span>
@@ -310,19 +341,19 @@ const EditForm = ({
         </Form.Item>
         <Row>
           <Col>
-            <Form.Item name="gender" label="เพศ" rules={[{ required: true }]}>
+            <Form.Item name="gender" label={t('input.gender')} rules={[{ required: true, message: t('error') }]}>
               <Radio.Group
                 value={formData.gender}
                 onChange={(e) => handleInputChange('gender', e.target.value)}
               >
-                <Radio value={'ผู้ชาย'}>ผู้ชาย</Radio>
-                <Radio value={'ผู้หญิง'}>ผู้หญิง</Radio>
-                <Radio value={'ไม่ระบุ'}>ไม่ระบุ</Radio>
+                <Radio value={t('options.gender.male')}>{t('options.gender.male')}</Radio>
+                <Radio value={t('options.gender.female')}>{t('options.gender.female')}</Radio>
+                <Radio value={t('options.gender.notSaying')}>{t('options.gender.notSaying')}</Radio>
               </Radio.Group>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="tel" label="หมายเลขโทรศัพท์มือถือ" rules={[{ required: true }]}>
+        <Form.Item name="tel" label={t('input.tel')} rules={[{ required: true, message: t('error') }]}>
           <Row>
             <Col span={4} className="id-input">
               <Select
@@ -345,7 +376,7 @@ const EditForm = ({
         </Form.Item>
         <Row>
           <Col span={10}>
-            <Form.Item name="passport" label="หนังสือเดินทาง">
+            <Form.Item name="passport" label={t('input.passport')}>
               <Input
                 value={formData.passport}
                 onChange={(e) => handleInputChange('passport', e.target.value)}
@@ -357,8 +388,8 @@ const EditForm = ({
           <Col span={10}>
             <Form.Item
               name="expectedSalary"
-              label="เงินเดือนที่คาดหวัง"
-              rules={[{ required: true }]}
+              label={t('input.expectedSalary')}
+              rules={[{ required: true, message: t('error') }]}
             >
               <Input
                 value={formData.expectedSalary}
@@ -369,10 +400,10 @@ const EditForm = ({
           <Col span={14}>
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Button htmlType="submit" className="send-button">
-                แก้ข้อมูล
+                {t('action.confirmEdit')}
               </Button>
               <Button htmlType="button" onClick={() => setModalIsOpen(false)}>
-                ยกเลิก
+                {t('action.cancel')}
               </Button>
             </Form.Item>
           </Col>
@@ -380,6 +411,6 @@ const EditForm = ({
       </Form>
     </div>
   );
-};
+}
 
 export default EditForm;

@@ -31,8 +31,14 @@ section {
 header {
   width: 100%;
   padding: 1rem;
-  padding-bottom: 2rem;
-  position: relative;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  .select-lang {
+    margin-left: auto;
+  }
 }
 
 :where(.css-dev-only-do-not-override-nnuwmp).ant-form   {

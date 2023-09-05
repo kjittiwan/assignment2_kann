@@ -15,6 +15,7 @@ i18n
       en: {
         translation: {
           header: 'Form Handling',
+          error: 'This field is required',
           input: {
             prefix:"Prefix",
             firstName: "First name",
@@ -48,7 +49,13 @@ i18n
             select: "Select",
             selectAll: "Select all",
             deleteSelection: "Delete selection",
+            confirmEdit: "Confirm edit",
+            cancel: "Cancel",
             actions: "Actions",        
+          },
+          placeholder: {
+            nationality: "- - Select - -",
+            birthday: "mm/dd/yyyy"
           },
           language: {
             en: "En",
@@ -59,6 +66,7 @@ i18n
       th: {
         translation: {
           header: 'การจัดการหน้าฟอร์ม',
+          error: 'กรุณากรอกข้อมูลช่องนี้',
           input: {
             prefix:"คำนำหน้า",
             firstName: "ชื่อจริง",
@@ -72,6 +80,18 @@ i18n
             passport: "หนังสือเดินทาง",
             expectedSalary: "เงินเดือนที่คาดหวัง",
           },
+          options: {
+            prefix: {
+              mr: "นาย",
+              ms: "นางสาว",
+              mrs: "นาง",
+            },
+            gender: {
+              male: "ผู้ชาย",
+              female: "ผู้หญิง",
+              notSaying: "ไม่ระบุ",
+            }
+          },
           action: {
             clear:"ล้างข้อมูล",
             submit:"ส่งข้อมูล",
@@ -79,8 +99,14 @@ i18n
             delete: "ลบ",
             select: "เลือกรายการนี้",
             selectAll: "เลือกทั้งหมด",
+            confirmEdit: "แก้ข้อมูล",
+            cancel: "ยกเลิก",
             deleteSelection: "ลบข้อมูล",
             actions: "จัดการ",          
+          },
+          placeholder: {
+            nationality: "- - กรุณาเลือก - -",
+            birthday: "เดือน/วัน/ปี"
           },
           language: {
             en: "อังกฤษ",
