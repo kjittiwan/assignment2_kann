@@ -12,6 +12,7 @@ const initialState = {
   tel: '',
   passport: '',
   expectedSalary: '',
+  key: '',
 };
 
 const editSlice = createSlice({
@@ -51,6 +52,9 @@ const editSlice = createSlice({
     setExpectedSalary: (state, action) => {
       state.expectedSalary = action.payload;
     }, 
+    setKey: (state, action) => {
+      state.key = action.payload;
+    }, 
   },
 });
 
@@ -65,6 +69,7 @@ export const {
   setGender,
   setTel,
   setPassport,
-  setExpectedSalary
+  setExpectedSalary,
+  setKey,
 } = editSlice.actions;
 export default editSlice.reducer;

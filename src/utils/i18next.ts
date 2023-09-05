@@ -1,6 +1,28 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { nationalitiesEn, nationalitiesTh } from './data';
+
+const nationalitiesObjectEn: { [key: string]: string } = {};
+const nationalitiesObjectTh: { [key: string]: string } = {};
+
+nationalitiesEn.forEach((item) => {
+  nationalitiesObjectEn[item] = item;
+});
+
+nationalitiesTh.forEach((itemTh) => {
+  nationalitiesEn.forEach((itemEn) => {
+    nationalitiesObjectTh[itemEn] = itemTh;
+  });
+});
+
+
+
+for (let i = 0; i < nationalitiesTh.length; i++) {
+  const key = nationalitiesEn[i];
+  const value = nationalitiesTh[i];
+  nationalitiesObjectTh[key] = value;
+}
 
 i18n
   .use(LanguageDetector)
@@ -61,6 +83,7 @@ i18n
             en: "En",
             th: "Th",
           },
+          nationalities: nationalitiesObjectEn,
         }
       },
       th: {
@@ -112,6 +135,7 @@ i18n
             en: "อังกฤษ",
             th: "ไทย",
           },
+          nationalities: nationalitiesObjectTh,
         }
       },
     }

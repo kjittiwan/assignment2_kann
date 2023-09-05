@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, Input, Radio, Select, DatePicker, Row, Col } from 'antd';
-import { nationalitiesTh, nationalitiesEn, countryCodes } from '../utils/data'
+import { nationalitiesEn, countryCodes } from '../utils/data';
 import {
   setPrefix,
   setFirstName,
@@ -32,25 +32,20 @@ type FormData = {
   passport: string;
   expectedSalary: string;
   key: string;
-}
+};
 
-type SavedData = {
-  dataCollection: FormData[];
-}
 type EditFormProps = {
   itemToEdit: FormData;
   setDataSource: (data: FormData[]) => void;
-  setModalIsOpen: (isOpen: boolean) => void; 
+  setModalIsOpen: (isOpen: boolean) => void;
   t: TFunction;
-  currentLanguage: string
-}
-function EditForm ({
+};
+function EditForm({
   itemToEdit,
   setDataSource,
   setModalIsOpen,
   t,
-  currentLanguage,
-}: EditFormProps) : JSX.Element {
+}: EditFormProps): JSX.Element {
   const dispatch = useDispatch();
   const formData = useSelector((state: RootState) => state.editData);
   const formatId = (id: string) => {
@@ -73,7 +68,9 @@ function EditForm ({
 
   const [form] = Form.useForm();
   const [idParts, setIdParts] = useState<string[]>(
-    itemToEdit.idNumber === '' ? ['', '', '', '', ''] : formatId(itemToEdit.idNumber)
+    itemToEdit.idNumber === ''
+      ? ['', '', '', '', '']
+      : formatId(itemToEdit.idNumber),
   );
   const [telParts, setTelParts] = useState<string[]>(splitTel(itemToEdit.tel));
 
@@ -98,7 +95,7 @@ function EditForm ({
     if (itemToEdit.idNumber !== '') {
       dispatch(setIdNumber(itemToEdit.idNumber));
     } else {
-      dispatch(setIdNumber(''))
+      dispatch(setIdNumber(''));
     }
     dispatch(setLastName(itemToEdit.lastName));
     dispatch(setNationality(itemToEdit.nationality));
@@ -112,43 +109,50 @@ function EditForm ({
     setInitialStates();
   }, []);
 
-  const handleInputChange = useCallback((name: string, value: string) => {
-    switch (name) {
-      case 'prefix':
-        dispatch(setPrefix(value));
-        break;
-      case 'firstName':
-        dispatch(setFirstName(value));
-        break;
-      case 'lastName':
-        dispatch(setLastName(value));
-        break;
-      case 'birthday':
-        dispatch(setBirthday(value));
-        break;
-      case 'nationality':
-        dispatch(setNationality(value));
-        break;
-      case 'gender':
-        dispatch(setGender(value));
-        break;
-      case 'tel':
-        dispatch(setTel(value));
-        break;
-      case 'passport':
-        dispatch(setPassport(value));
-        break;
-      case 'expectedSalary':
-        dispatch(setExpectedSalary(value));
-        break;
-      default:
-        break;
-    }
-  }, [dispatch]);
+  const handleInputChange = useCallback(
+    (name: string, value: string) => {
+      switch (name) {
+        case 'prefix':
+          dispatch(setPrefix(value));
+          break;
+        case 'firstName':
+          dispatch(setFirstName(value));
+          break;
+        case 'lastName':
+          dispatch(setLastName(value));
+          break;
+        case 'birthday':
+          dispatch(setBirthday(value));
+          break;
+        case 'nationality':
+          dispatch(setNationality(value));
+          break;
+        case 'gender':
+          dispatch(setGender(value));
+          break;
+        case 'tel':
+          dispatch(setTel(value));
+          break;
+        case 'passport':
+          dispatch(setPassport(value));
+          break;
+        case 'expectedSalary':
+          dispatch(setExpectedSalary(value));
+          break;
+        default:
+          break;
+      }
+    },
+    [dispatch],
+  );
 
-  const handleInputChangeId = (userInput: string, value: string, index: number, maxLength: number) => {
+  const handleInputChangeId = (
+    userInput: string,
+    value: string,
+    index: number,
+    maxLength: number,
+  ) => {
     const idPartsClone = [...idParts];
-    console.log('userInput', userInput)
     if (userInput === 'deleteContentBackward') {
       idPartsClone[index] = idPartsClone[index].slice(0, -1);
       if (index > 0 && idParts[index].trim().length === 1) {
@@ -162,14 +166,13 @@ function EditForm ({
         if (nextIndex < idParts.length) {
           document.getElementById(`input-${nextIndex}-edit`)?.focus();
         }
-      } 
+      }
       idPartsClone[index] = numericValue;
     }
-    const combinedParts = idPartsClone.join("");
+    const combinedParts = idPartsClone.join('');
     setIdParts(idPartsClone);
     dispatch(setIdNumber(combinedParts));
   };
-
 
   const handleInputChangeTel = (value: string, index: number) => {
     const numericValue = value.replace(/[^\d-\s]/g, '');
@@ -186,7 +189,9 @@ function EditForm ({
 
   const updateData = (formData: FormData) => {
     const savedDataString = localStorage.getItem('dataCollection');
-    const savedData: SavedData = savedDataString ? JSON.parse(savedDataString) : [];
+    const savedData: FormData[] = savedDataString
+      ? JSON.parse(savedDataString)
+      : [];
     if (savedData) {
       const updatedData = [...savedData].map((item) => {
         if (item.key === itemToEdit.key) {
@@ -202,15 +207,17 @@ function EditForm ({
   };
 
   return (
-    <div className="modal">
+    <div className='modal'>
       <Form
         form={form}
-        name="edit-form"
-        className="edit-form"
+        name='edit-form'
+        className='edit-form'
         initialValues={initialValues}
         onValuesChange={(changedValues, allValues) => {
           if ('firstName' in changedValues || 'lastName' in changedValues) {
-            const updatedFullName = `${allValues.firstName || ''} ${allValues.lastName || ''}`;
+            const updatedFullName = `${allValues.firstName || ''} ${
+              allValues.lastName || ''
+            }`;
             dispatch(setFullName(updatedFullName));
           }
         }}
@@ -219,7 +226,7 @@ function EditForm ({
         <Row gutter={8}>
           <Col span={4}>
             <Form.Item
-              name="prefix"
+              name='prefix'
               label={t('input.prefix')}
               rules={[{ required: true, message: t('error') }]}
             >
@@ -241,7 +248,11 @@ function EditForm ({
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="firstName" label={t('input.firstName')} rules={[{ required: true, message: t('error') }]}>
+            <Form.Item
+              name='firstName'
+              label={t('input.firstName')}
+              rules={[{ required: true, message: t('error') }]}
+            >
               <Input
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -249,7 +260,11 @@ function EditForm ({
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="lastName" label={t('input.lastName')} rules={[{ required: true, message: t('error') }]}>
+            <Form.Item
+              name='lastName'
+              label={t('input.lastName')}
+              rules={[{ required: true, message: t('error') }]}
+            >
               <Input
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -259,39 +274,54 @@ function EditForm ({
         </Row>
         <Row gutter={8}>
           <Col span={6}>
-            <Form.Item name="birthday" label={t('input.birthday')} rules={[{ required: true, message: t('error') }]}>
+            <Form.Item
+              name='birthday'
+              label={t('input.birthday')}
+              rules={[{ required: true, message: t('error') }]}
+            >
               <DatePicker
-                format="MM/DD/YYYY"
+                format='MM/DD/YYYY'
                 placeholder={t('placeholder.birthday')}
                 value={formData.birthday}
-                onChange={(_date, dateString) => handleInputChange('birthday', dateString)}
+                onChange={(_date, dateString) =>
+                  handleInputChange('birthday', dateString)
+                }
               />
             </Form.Item>
           </Col>
           <Col span={10}>
-            <Form.Item name="nationality" label={t('input.nationality')} rules={[{ required: true, message: t('error') }]}>
+            <Form.Item
+              name='nationality'
+              label={t('input.nationality')}
+              rules={[{ required: true, message: t('error') }]}
+            >
               <Select
                 value={formData.nationality}
                 onChange={(value) => handleInputChange('nationality', value)}
                 placeholder={t('placeholder.nationality')}
               >
-                {currentLanguage === 'th'
+                {nationalitiesEn.map((item, index) => (
+                  <Select.Option key={index} value={t(`nationalities.${item}`)}>
+                    {t(`nationalities.${item}`)}
+                  </Select.Option>
+                ))}
+                {/* {currentLanguage === 'th'
                   ? nationalitiesTh.map((item, index) => (
                       <Select.Option key={index} value={item}>
-                        {item}
+                        {t(`nationalities.${item}`)}
                       </Select.Option>
                     ))
                   : nationalitiesEn.map((item, index) => (
                       <Select.Option key={index} value={item}>
-                        {item}
+                        {t(`nationalities.${item}`)}
                       </Select.Option>
                     ))
-                }
+                } */}
               </Select>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="idNumber" label={t('input.idNumber')}>
+        <Form.Item name='idNumber' label={t('input.idNumber')}>
           <Row>
             {idParts.map((part, index, array) => {
               const getMaxLength = (index: number): number => {
@@ -314,7 +344,7 @@ function EditForm ({
               return (
                 <Col
                   key={index}
-                  className="id-input"
+                  className='id-input'
                   span={
                     index === 0
                       ? 3
@@ -330,10 +360,23 @@ function EditForm ({
                   <Input
                     id={`input-${index}-edit`}
                     value={part}
-                    onChange={(e) => handleInputChangeId(e.nativeEvent?.inputType, e.target.value, index, maxLength)}
+                    onChange={(e) =>
+                      handleInputChangeId(
+                        e.nativeEvent?.inputType,
+                        e.target.value,
+                        index,
+                        maxLength,
+                      )
+                    }
                     maxLength={maxLength}
                   />
-                  <span className={`dash ${index === array.length - 1 ? 'hidden' : ''}`}>-</span>
+                  <span
+                    className={`dash ${
+                      index === array.length - 1 ? 'hidden' : ''
+                    }`}
+                  >
+                    -
+                  </span>
                 </Col>
               );
             })}
@@ -341,30 +384,48 @@ function EditForm ({
         </Form.Item>
         <Row>
           <Col>
-            <Form.Item name="gender" label={t('input.gender')} rules={[{ required: true, message: t('error') }]}>
+            <Form.Item
+              name='gender'
+              label={t('input.gender')}
+              rules={[{ required: true, message: t('error') }]}
+            >
               <Radio.Group
                 value={formData.gender}
                 onChange={(e) => handleInputChange('gender', e.target.value)}
               >
-                <Radio value={t('options.gender.male')}>{t('options.gender.male')}</Radio>
-                <Radio value={t('options.gender.female')}>{t('options.gender.female')}</Radio>
-                <Radio value={t('options.gender.notSaying')}>{t('options.gender.notSaying')}</Radio>
+                <Radio value={t('options.gender.male')}>
+                  {t('options.gender.male')}
+                </Radio>
+                <Radio value={t('options.gender.female')}>
+                  {t('options.gender.female')}
+                </Radio>
+                <Radio value={t('options.gender.notSaying')}>
+                  {t('options.gender.notSaying')}
+                </Radio>
               </Radio.Group>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="tel" label={t('input.tel')} rules={[{ required: true, message: t('error') }]}>
+        <Form.Item
+          name='tel'
+          label={t('input.tel')}
+          rules={[{ required: true, message: t('error') }]}
+        >
           <Row>
-            <Col span={4} className="id-input">
+            <Col span={4} className='id-input'>
               <Select
                 value={telParts[0]}
                 onChange={(value) => handleInputChangeTel(value, 0)}
               >
                 {countryCodes.map((item, index) => {
-                  return <Select.Option key={index} value={item}>{item}</Select.Option>;
+                  return (
+                    <Select.Option key={index} value={item}>
+                      {item}
+                    </Select.Option>
+                  );
                 })}
               </Select>
-              <span className="dash">-</span>
+              <span className='dash'>-</span>
             </Col>
             <Col span={8}>
               <Input
@@ -376,7 +437,7 @@ function EditForm ({
         </Form.Item>
         <Row>
           <Col span={10}>
-            <Form.Item name="passport" label={t('input.passport')}>
+            <Form.Item name='passport' label={t('input.passport')}>
               <Input
                 value={formData.passport}
                 onChange={(e) => handleInputChange('passport', e.target.value)}
@@ -387,22 +448,24 @@ function EditForm ({
         <Row>
           <Col span={10}>
             <Form.Item
-              name="expectedSalary"
+              name='expectedSalary'
               label={t('input.expectedSalary')}
               rules={[{ required: true, message: t('error') }]}
             >
               <Input
                 value={formData.expectedSalary}
-                onChange={(e) => handleInputChange('expectedSalary', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('expectedSalary', e.target.value)
+                }
               />
             </Form.Item>
           </Col>
           <Col span={14}>
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button htmlType="submit" className="send-button">
+              <Button htmlType='submit' className='send-button'>
                 {t('action.confirmEdit')}
               </Button>
-              <Button htmlType="button" onClick={() => setModalIsOpen(false)}>
+              <Button htmlType='button' onClick={() => setModalIsOpen(false)}>
                 {t('action.cancel')}
               </Button>
             </Form.Item>

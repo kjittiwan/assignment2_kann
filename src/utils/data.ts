@@ -30,7 +30,6 @@ export const nationalitiesTh : string[] = [
   "เนปาล",
   "ภูฏาน",
   "ศรีลังกา",
-  "ปากีสถาน",
   "อิหร่าน",
   "ตุรกี",
   "อาหรับ",
@@ -69,6 +68,7 @@ export const nationalitiesTh : string[] = [
   "เวเนซุเอลา",
   "โคลอมเบีย",
 ]
+
 export const nationalitiesEn : string[] = [
   "Thai",
   "American",
@@ -101,7 +101,6 @@ export const nationalitiesEn : string[] = [
   "Nepali",
   "Bhutanese",
   "Sri Lankan",
-  "Pakistani",
   "Iranian",
   "Turkish",
   "Arab",
@@ -196,5 +195,7 @@ export const countryCodes = [
   "+58",
   "+57",
 ]
+
+
 
 
